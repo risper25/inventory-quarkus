@@ -1,0 +1,128 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <title>Products</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/wingcss/0.1.8/wing.min.css"/>
+    <!-- Load AngularJS -->
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+    <script type="text/javascript">
+      var app = angular.module("ProductManagement", []);
+
+      //Controller Part
+      app.controller("ProductManagementController", function ($scope, $http) {
+
+        //Initialize page with default data which is blank in this example
+        $scope.products = [];
+
+        $scope.form = {
+          id: "",
+          productname: ""
+        };
+         $scope.form2 = {
+          id: "",
+          productname: ""
+        };
+
+        //Now load the data from server
+        _refreshPageData();
+
+        //HTTP POST methods for add products
+        $scope.add = function () {
+          var data = { "id": $scope.form.id, "productname": $scope.form.productname };
+
+          $http({
+            method: "POST",
+            url: '/product',
+            data: angular.toJson(data),
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          }).then(_success, _error);
+        };
+        //HTTP DELETE methods for delete products
+        $scope.delete = function () {
+          var data = { "id": $scope.form2.id, "productname": $scope.form2.productname };
+
+          $http({
+            method: "Delete",
+            url: '/product',
+            data: angular.toJson(data),
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          }).then(_success, _error);
+        };
+
+        /* Private Methods */
+        //HTTP GET- get all product collection
+        function _refreshPageData() {
+          $http({
+            method: 'GET',
+            url: '/product'
+          }).then(function successCallback(response) {
+            $scope.products = response.data;
+          }, function errorCallback(response) {
+            console.log(response.statusText);
+          });
+        }
+
+        function _success(response) {
+          _refreshPageData();
+          _clearForm();
+        }
+
+        function _error(response) {
+          alert(response.data.message || response.statusText);
+        }
+
+        //Clear the form
+        function _clearForm() {
+          $scope.form.id = "";
+          $scope.form.productname = "";
+          $scope.form2.id = "";
+          $scope.form2.productname = "";
+        }
+      });
+    </script>
+</head>
+<body ng-app="ProductManagement" ng-controller="ProductManagementController">
+
+<div class="container">
+    <h1>Inventory Products</h1>
+
+    <h3>Add a product</h3>
+    <form ng-submit="add()">
+        <div class="row">
+            <div class="col-6"><input type="text" placeholder="id" ng-model="form.id" size="60"/></div>
+        </div>
+        <div class="row">
+            <div class="col-6"><input type="text" placeholder="productname" ng-model="form.productname" size="60"/></div>
+        </div>
+        <input type="submit" value="Save"/>
+    </form>
+    <h3>delete a product</h3>
+    <form ng-submit="delete()">
+        <div class="row">
+            <div class="col-6"><input type="text" placeholder="id" ng-model="form.id" size="60"/></div>
+        </div>
+        <div class="row">
+            <div class="col-6"><input type="text" placeholder="productname" ng-model="form.productname" size="60"/></div>
+        </div>
+        <input type="submit" value="delete"/>
+    </form>
+
+
+    <h3>Product List</h3>
+    <div class="row">
+        <div class="col-4">productID</div>
+        <div class="col-8">product Name</div>
+    </div>
+    <div class="row" ng-repeat="product in products">
+        <div class="col-4">{{ product.id }}</div>
+        <div class="col-8">{{ product.productname }}</div>
+    </div>
+</div>
+
+</body>
+</html>
